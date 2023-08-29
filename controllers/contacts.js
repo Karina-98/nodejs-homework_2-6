@@ -1,19 +1,22 @@
 const Contact = require("../models/contact")
-const { HttpError } = require("../helpers/HttpError");
+const { HttpError } = require("../helpers");
 const { ctrlWrapper } = require("../helpers");
 
 
 const getAllContactsList = async (req, res, next) => {
- 
-    const result = await Contact.find()
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 10 } = req.query;
+  const skip = (page - 1) * limit;
+    const result = await Contact.find({owner}, "-createAt -updateAt", {skip: skip, limit: limit})
     res.status(200).json(result);
 }
 
 const getContactsById = async (req, res) => {
   
     const { id } = req.params;
+    const {_id: owner} = req.user;
    
-    const result = await Contact.findById(id);
+    const result = await Contact.findOne({_id:id, owner});
     if (!result) {
       throw HttpError(404, "Contact not found");
     }
@@ -22,16 +25,22 @@ const getContactsById = async (req, res) => {
 };
 
 const addContact = async (req, res) => {
- 
-    const result = await Contact.create(req.body);
+  const { _id: owner } = req.user;
+  
+  const result = await Contact.create({ ...req.body, owner });
+  console.log(result)
     res.status(201).json(result);
  
 };
 
 const deleteContact = async (req, res) => {
 
-    const { id } = req.params;
-    const result = await Contact.findByIdAndRemove(id);
+  const { id } = req.params;
+  const {_id:owner} = req.user;
+
+  
+    const result = await Contact.findOneAndDelete({_id:id, owner});
+  
     if (!result) {
       throw HttpError(404, "Contact not found");
     }
@@ -43,13 +52,14 @@ const updateContact = async (req, res) => {
   
   
   const { id } = req.params;
+  const { _id: owner } = req.user;
   
-      const result = await Contact.findByIdAndUpdate(id, req.body, {new: true});
+      const result = await Contact.findOneAndUpdate({_id:id,owner}, req.body, {new: true});
       if (!result) {
-        throw HttpError(404, "Contact not found");
+        throw HttpError(404, "Contact not found ");
   }
   if (Object.keys(req.body).length === 0) {
-    throw HttpError(400, "missing fields");
+    throw HttpError(400, "missing fields");   
   }
     res.status(200).json(result)
 
@@ -60,13 +70,14 @@ const favoriteContact = async (req, res) => {
   
   
   const { id } = req.params;
+  const { _id: owner } = req.user;
   
-      const result = await Contact.findByIdAndUpdate(id, req.body, {new: true});
+      const result = await Contact.findOneAndUpdate({_id: id, owner}, req.body, {new: true});
       if (!result) {
         throw HttpError(404, "Contact not found");
   }
   if (Object.keys(req.body).length === 0) {
-    throw HttpError(400, "missing fields");
+    throw HttpError(400, "Missing fields");
   }
     res.status(200).json(result)
 
