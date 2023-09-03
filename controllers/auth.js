@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken")
 const gravatar = require("gravatar")
 const path = require("path")
 const fs = require("fs/promises")
+const Jimp = require("jimp");
 require("dotenv").config()
 
 const { ctrlWrapper, HttpError } = require("../helpers")
@@ -82,6 +83,9 @@ const updateAvatar = async (req, res) => {
 
     const resultUpload = path.join(avatarsDir, fileName);
     await fs.rename(tempUpload, resultUpload);
+
+    const img = await Jimp.read(resultUpload);
+    img.cover(250, 250).write(resultUpload);
 
     const avatarURL = path.join("avatars", fileName);
     await User.findByIdAndUpdate(_id, { avatarURL })
