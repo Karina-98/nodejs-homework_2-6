@@ -25,6 +25,14 @@ password: {
   avatarURL: {
     type: String,
     required: true,
+  },
+  verify: {
+    type: Boolean,
+    default: false
+  },
+  verificationToken: {
+    type: String,
+    default: ""
   }
 }, { versionKey: false, timestamps: true })
 
