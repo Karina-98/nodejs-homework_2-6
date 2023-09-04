@@ -21,6 +21,10 @@ password: {
   token: {
     type: String,
     default: ""
+  },
+  avatarURL: {
+    type: String,
+    required: true,
   }
 }, { versionKey: false, timestamps: true })
 
